@@ -1,0 +1,52 @@
+<div class="container">
+  <header>
+    <h1>Data Mining Tool</h1>
+    <p>Upload a CSV file to begin pre-processing.</p>
+  </header>
+
+  <section class="card">
+    <h2>1. Upload Dataset</h2>
+    <div class="file-upload-wrapper">
+      <input 
+        type="file" 
+        id="file-upload" 
+        accept=".csv" 
+        class="file-upload-input"
+        (change)="onFileSelected($event)" 
+      />
+      <label for="file-upload" class="file-upload-label">
+        <span>{{ filename() || "Choose a CSV file..." }}</span>
+      </label>
+    </div>
+
+    <div *ngIf="uploading()" class="upload-status">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <span>Uploading and processing...</span>
+    </div>
+
+    <div *ngIf="previewCols().length" class="table-wrap">
+      <h3>Preview of <strong>{{ filename() }}</strong> (First 20 Rows)</h3>
+      <table mat-table [dataSource]="previewRows()" class="mat-elevation-z2">
+        <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
+          <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
+          <td mat-cell *matCellDef="let row">{{ row[col] }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="previewCols(); sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: previewCols();"></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="filename() && !uploading()">
+    <h2>2. Actions</h2>
+    <p>You can now perform pre-processing or classification on <strong>{{ filename() }}</strong>.</p>
+    <div class="actions-container">
+      <button mat-raised-button color="primary" (click)="openPreprocess()">
+        Pre-process Data
+      </button>
+      <button mat-raised-button color="accent" (click)="openClassify()">
+        Classify Data
+      </button>
+    </div>
+  </section>
+</div>
