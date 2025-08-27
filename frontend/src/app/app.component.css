@@ -4,13 +4,13 @@
   --card-bg: #ffffff;
   --text-color: #1f2937;
   --border-color: #e5e7eb;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
             0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -96,6 +96,15 @@ h2 {
   color: var(--primary-color);
 }
 
+/* Divider */
+.or-divider {
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Table Preview */
 .table-wrap {
   margin-top: 1rem;
   overflow-x: auto;
@@ -106,7 +115,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   border: 1px solid var(--border-color);
   padding: 6px 10px;
   text-align: left;
@@ -116,4 +126,33 @@ th, td {
   margin-top: 1rem;
   color: var(--primary-color);
   font-weight: 500;
+}
+
+/* Dataset List */
+mat-list-item {
+  cursor: pointer;
+  border-radius: 0.5rem;
+  margin-bottom: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+mat-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+mat-list-item.selected {
+  background-color: #e0e7ff;
+  border-left: 4px solid var(--primary-color);
+}
+
+/* Actions Section */
+.actions-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.actions-container button {
+  flex: 1;
+  min-width: 150px;
 }

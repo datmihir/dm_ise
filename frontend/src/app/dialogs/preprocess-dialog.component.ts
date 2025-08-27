@@ -1,8 +1,8 @@
 // ------------------------------------------------------
 // file: src/app/dialogs/preprocess-dialog.component.ts
 // ------------------------------------------------------
-import { Component, Inject, inject, signal, effect } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { Component, Inject, inject, signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,11 +12,22 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
+import { VisualizationDialogComponent } from './visualization-dialog.component';
 
 @Component({
   selector: 'app-preprocess-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatTableModule, MatSnackBarModule],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatTableModule,
+    MatSnackBarModule
+  ],
   template: `
     <h2 mat-dialog-title>Preprocessing</h2>
     <div mat-dialog-content [formGroup]="form">
@@ -128,7 +139,6 @@ import { ApiService } from '../services/api.service';
         </ng-container>
 
         <ng-container *ngSwitchDefault>
-          <!-- Normalizations expect a column -->
           <mat-form-field class="half" appearance="outline" *ngIf="form.value.task?.startsWith('normalize')">
             <mat-label>Column</mat-label>
             <input matInput formControlName="column" />
@@ -158,6 +168,8 @@ import { ApiService } from '../services/api.service';
 export class PreprocessDialogComponent {
   private api = inject(ApiService);
   private snack = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private dialogRef = inject(MatDialogRef<PreprocessDialogComponent>);
 
   filename = signal<string>('');
   result = signal<any | null>(null);
@@ -166,7 +178,6 @@ export class PreprocessDialogComponent {
   form = this.fb.group({
     filename: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
     task: this.fb.control<string | null>(null, { validators: [Validators.required] }),
-    // Common optional fields used per task branch
     column: this.fb.control<string>(''),
     column1: this.fb.control<string>(''),
     column2: this.fb.control<string>(''),
@@ -203,8 +214,23 @@ export class PreprocessDialogComponent {
     }
 
     this.api.process(payload).subscribe({
-      next: (res) => this.result.set(res),
-      error: (err) => this.snack.open(err?.error?.error ?? 'Failed', 'Close', { duration: 3000 })
+      next: (res) => {
+        if (v.task === 'visualization') {
+          this.dialog.open(VisualizationDialogComponent, {
+            width: '900px',
+            data: {
+              chart_type: res.chart_type,
+              chart_data: res.chart_data,
+              params: payload
+            }
+          });
+          this.dialogRef.close();
+        } else {
+          this.result.set(res);
+        }
+      },
+      error: (err) =>
+        this.snack.open(err?.error?.error ?? 'Failed', 'Close', { duration: 3000 })
     });
   }
 }

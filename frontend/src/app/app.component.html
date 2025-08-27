@@ -1,29 +1,54 @@
 <div class="container">
   <header>
     <h1>Data Mining Tool</h1>
-    <p>Upload a CSV file to begin pre-processing.</p>
+    <p>Select or upload a dataset to begin pre-processing.</p>
   </header>
 
+  <!-- Dataset Library -->
+  <section class="card">
+    <h2>Available Datasets</h2>
+    <mat-list role="list">
+      <mat-list-item
+        *ngFor="let ds of datasets()"
+        (click)="selectDataset(ds)"
+        [class.selected]="selectedDataset()?.id === ds.id"
+        role="listitem">
+
+        <mat-icon matListItemIcon>description</mat-icon>
+        <div matListItemTitle>{{ ds.filename }}</div>
+        <div matListItemLine>Uploaded: {{ ds.upload_date }}</div>
+        <div matListItemLine>Columns: {{ ds.columns.join(', ') }}</div>
+      </mat-list-item>
+    </mat-list>
+  </section>
+
+  <!-- Upload Section -->
   <section class="card">
     <h2>1. Upload Dataset</h2>
     <div class="file-upload-wrapper">
-      <input 
-        type="file" 
-        id="file-upload" 
-        accept=".csv" 
+      <input
+        type="file"
+        id="file-upload"
+        accept=".csv"
         class="file-upload-input"
-        (change)="onFileSelected($event)" 
-      />
+        (change)="onFileSelected($event)" />
       <label for="file-upload" class="file-upload-label">
         <span>{{ filename() || "Choose a CSV file..." }}</span>
       </label>
     </div>
+
+    <div class="or-divider">— OR —</div>
+
+    <button mat-stroked-button color="primary" (click)="openUploadDialog()">
+      Upload via Dialog
+    </button>
 
     <div *ngIf="uploading()" class="upload-status">
       <mat-progress-bar mode="indeterminate"></mat-progress-bar>
       <span>Uploading and processing...</span>
     </div>
 
+    <!-- Preview Table -->
     <div *ngIf="previewCols().length" class="table-wrap">
       <h3>Preview of <strong>{{ filename() }}</strong> (First 20 Rows)</h3>
       <table mat-table [dataSource]="previewRows()" class="mat-elevation-z2">
@@ -37,15 +62,22 @@
     </div>
   </section>
 
-  <section class="card" *ngIf="filename() && !uploading()">
+  <!-- Actions -->
+  <section class="card" *ngIf="selectedDataset() && !uploading()">
     <h2>2. Actions</h2>
-    <p>You can now perform pre-processing or classification on <strong>{{ filename() }}</strong>.</p>
+    <p>
+      You can now perform operations on:
+      <strong>{{ selectedDataset()?.filename }}</strong>
+    </p>
     <div class="actions-container">
       <button mat-raised-button color="primary" (click)="openPreprocess()">
         Pre-process Data
       </button>
       <button mat-raised-button color="accent" (click)="openClassify()">
         Classify Data
+      </button>
+      <button mat-raised-button color="warn" (click)="openHistory()">
+        View History
       </button>
     </div>
   </section>
