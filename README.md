@@ -85,8 +85,8 @@ Make sure you have the following installed:
 ### 🔹 1. Clone Repository
 
 ```bash
-git clone <your-repository-url>
-cd <project-folder>
+git clone https://github.com/datmihir/dm_ise/
+cd dm_ise
 ```
 
 ---
@@ -180,5 +180,6 @@ Runs on: **[http://localhost:4200](http://localhost:4200)**
    * Preprocess data
    * Classify data
    * View history
+
 
 
