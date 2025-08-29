@@ -1,192 +1,184 @@
-Data Mining Tool (PE-IV 6CS412)
-Project for PE-IV 6CS412: Data Mining Technology Stack: Angular, Django (Python), MySQL
+# 📊 Data Mining Tool (PE-IV 6CS412)
 
-1. Introduction
-This web application is a comprehensive data mining tool developed as part of the coursework for PE-IV 6CS412: Data Mining. It provides a user-friendly interface to upload datasets, perform a wide variety of data pre-processing tasks, and apply several classification algorithms.
+Built with **Angular (Frontend), Django (Backend), and MySQL (Database)**.
+This project was developed as part of the coursework for **PE-IV 6CS412: Data Mining**.
 
-A key requirement of this project is that all data pre-processing and classification algorithms are implemented from scratch using pure Python, without relying on external data science libraries like scikit-learn or pandas for the core logic.
+---
 
-The application features a decoupled architecture with an Angular frontend and a Django backend, communicating via a REST API. All uploaded dataset information and analysis results are stored persistently in a MySQL database.
+## 🚀 Tech Stack
 
-2. Features Implemented
-2.1. Dataset Management
-Upload & Preview: Users can upload CSV files. The system provides an immediate preview of the first 20 rows.
+* **Frontend:** Angular + Angular Material
+* **Backend:** Django (Python) + Django 
+* **Database:** MySQL
+* **Version Control:** Git
 
-Dataset Library: All uploaded datasets are saved and listed in a central library.
+---
 
-Analysis History: The application saves every analysis run on a dataset to the database, allowing users to view a complete history of operations.
+## ✨ Features
 
-2.2. Pre-processing Tasks
-The following pre-processing tasks can be performed on any selected dataset:
+### 📂 Dataset Management
 
-Statistical Description:
+* Upload CSV datasets
+* Preview first 10 rows instantly
+* Dataset Library to manage all uploaded files
+* Save complete **analysis history** for reproducibility
 
-Measures of Central Tendency (Mean, Median, Mode)
+### ⚙️ Data Preprocessing
 
-Dispersion of Data:
+* **Statistical Description**
 
-Variance and Standard Deviation
+  * Mean, Median, Mode
+* **Dispersion Measures**
 
-Data Cleaning:
+  * Variance, Standard Deviation
+* **Data Cleaning**
 
-Handle Missing Values by removing rows.
+  * Handle missing values (row removal / mean imputation)
+* **Statistical Tests**
 
-Handle Missing Values by filling with the column's mean.
+  * Chi-Square Test (categorical data)
+* **Correlation & Covariance**
 
-Statistical Tests:
+  * Pearson Correlation Coefficient
+  * Covariance
+* **Normalization**
 
-Chi-Square Test for two categorical columns.
+  * Min-Max
+  * Z-Score
+  * Decimal Scaling
+* **Discretization**
 
-Correlation & Covariance:
+  * Equal-Width Binning
+* **Visualization Data Generation**
 
-Pearson Correlation Coefficient and Covariance for two numerical columns.
+  * Histograms
+  * Scatter Plots
 
-Normalization:
+### 🤖 Classification & Regression
 
-Min-Max Normalization
+* **Decision Tree**
 
-Z-Score Normalization
+  * Entropy (Information Gain)
+  * Gain Ratio
+  * Gini Index
+* **k-Nearest Neighbors (k-NN)**
+* **Rule-Based Classifier (1R)**
+* **Naïve Bayesian Classifier**
+* **Simple Linear Regression**
+* **Artificial Neural Network (Perceptron for binary classification)**
 
-Decimal Scaling Normalization
+---
 
-Discretization:
+## 🛠️ Prerequisites
 
-Discretization by Equal-Width Binning.
+Make sure you have the following installed:
 
-Visualization:
+* [Python 3.8+](https://www.python.org/downloads/)
+* [Node.js (LTS) + npm](https://nodejs.org/)
+* [MySQL Server](https://dev.mysql.com/downloads/)
+* [Git](https://git-scm.com/)
 
-Generate data for Histograms.
+---
 
-Generate data for Scatter Plots.
+## ⚡ Installation & Setup
 
-2.3. Classification Algorithms
-The following classifiers can be trained and used for prediction:
+### 🔹 1. Clone Repository
 
-Decision Tree: With three different split criteria:
-
-Entropy (Information Gain)
-
-Gain Ratio
-
-Gini Index
-
-k-Nearest Neighbors (k-NN): Predicts the class of a new instance based on its neighbors.
-
-Rule-Based Classifier: A simple 1R (One Rule) classifier.
-
-Regression: Simple Linear Regression to find the relationship between two variables.
-
-Naïve Bayesian Classifier: A probabilistic classifier based on Bayes' theorem.
-
-Artificial Neural Network (ANN): A single Perceptron model for binary classification.
-
-3. Prerequisites
-Before you begin, ensure you have the following software installed on your system:
-
-Python (version 3.8 or higher)
-
-Node.js and npm (LTS version recommended)
-
-Git version control
-
-MySQL Server
-
-4. Installation and Deployment Steps
-4.1. Backend Setup (Django)
-Clone the Project:
-
+```bash
 git clone <your-repository-url>
-cd <project-folder>/backend
+cd <project-folder>
+```
 
-Create and Activate Virtual Environment:
+---
 
-# Create the environment
+### 🔹 2. Backend Setup (Django)
+
+```bash
+cd backend
+
+# Create virtual environment
 python -m venv venv
-# Activate it
-# On Windows:
+
+# Activate venv
+# Windows
 .\venv\Scripts\activate
-# On macOS/Linux:
+# macOS/Linux
 source venv/bin/activate
 
-Install Python Dependencies:
-
+# Install dependencies
 pip install Django django-cors-headers mysqlclient
+```
 
-Configure MySQL Database:
+#### Configure Database
 
-Log in to your MySQL server and create a new database.
+Login to MySQL and create a database:
 
+```sql
 CREATE DATABASE dm_tool_db;
+```
 
-Open the backend/dm_project/settings.py file.
+Update `backend/dm_project/settings.py`:
 
-Locate the DATABASES section and update it with your MySQL credentials:
-
+```python
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dm_tool_db', # The name you chose
+        'NAME': 'dm_tool_db',
         'USER': 'root',
-        'PASSWORD': 'YOUR_MYSQL_PASSWORD', # Your MySQL root password
+        'PASSWORD': 'YOUR_MYSQL_PASSWORD',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
+```
 
-Run Database Migrations:
+Run migrations:
 
+```bash
 python manage.py makemigrations api
 python manage.py migrate
+```
 
-4.2. Frontend Setup (Angular)
-Navigate to Frontend Directory:
-Open a new, separate terminal and navigate to the frontend folder.
+Start backend server:
 
-cd <project-folder>/frontend
+```bash
+python manage.py runserver
+```
 
-Install Node.js Dependencies:
+Runs on: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
+---
+
+### 🔹 3. Frontend Setup (Angular)
+
+```bash
+cd frontend
+
+# Install dependencies
 npm install
 
-Install Angular Material:
-This is required for the UI components to work correctly.
-
+# Add Angular Material
 ng add @angular/material
+```
 
-Choose a prebuilt theme (e.g., "Indigo/Pink").
+Start frontend server:
 
-Answer "Yes" to setting up global typography styles.
+```bash
+ng serve
+```
 
-Answer "Yes" to including animations.
+Runs on: **[http://localhost:4200](http://localhost:4200)**
 
-4.3. Running the Application
-You must have two terminals running simultaneously.
+---
 
-Start the Backend Server:
+## 📖 Usage Guide
 
-In your backend terminal (with venv active):
+1. **Upload Dataset** → via "Upload New Dataset" button.
+2. **Select Dataset** → appears in Dataset Library.
+3. **Perform Actions**
 
-python manage.py runserver
+   * Preprocess data
+   * Classify data
+   * View history
 
-The backend will be running at http://127.0.0.1:8000.
 
-Start the Frontend Server:
-
-In your frontend terminal:
-
-ng serve --open
-
-The application will automatically open in your browser at http://localhost:4200.
-
-5. How to Use the Application
-Upload a Dataset: Click the "Upload New Dataset" button to open a dialog and select a CSV file.
-
-Select a Dataset: After uploading, the dataset will appear in the "Dataset Library". Click on it to select it.
-
-Perform Actions: Once a dataset is selected, the "Actions" card will become active.
-
-Click "Pre-process Data" to open a dialog with all pre-processing options.
-
-Click "Classify Data" to open a dialog with all classification algorithms.
-
-Click "View History" to see a record of all analyses previously run on that dataset.
