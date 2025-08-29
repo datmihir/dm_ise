@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { VisualizationDialogComponent } from './visualization-dialog.component';
@@ -26,7 +27,8 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
     MatSelectModule,
     MatButtonModule,
     MatTableModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatCardModule
   ],
   template: `
     <h2 mat-dialog-title>Preprocessing</h2>
@@ -52,14 +54,18 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
         <ng-container *ngSwitchCase="'central_tendency'">
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" placeholder="e.g. sepal_length" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
 
         <ng-container *ngSwitchCase="'dispersion_of_data'">
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
 
@@ -73,36 +79,48 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
           </mat-form-field>
           <mat-form-field class="half" appearance="outline" *ngIf="form.value.method==='fill_mean'">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
 
         <ng-container *ngSwitchCase="'chi_square_test'">
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column 1</mat-label>
-            <input matInput formControlName="column1" />
+            <mat-select formControlName="column1">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column 2</mat-label>
-            <input matInput formControlName="column2" />
+            <mat-select formControlName="column2">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
 
         <ng-container *ngSwitchCase="'correlation_covariance'">
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column 1</mat-label>
-            <input matInput formControlName="column1" />
+            <mat-select formControlName="column1">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column 2</mat-label>
-            <input matInput formControlName="column2" />
+            <mat-select formControlName="column2">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
 
         <ng-container *ngSwitchCase="'discretize_by_binning'">
           <mat-form-field class="half" appearance="outline">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
           <mat-form-field class="half" appearance="outline">
             <mat-label>Number of bins</mat-label>
@@ -120,7 +138,9 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
           </mat-form-field>
           <mat-form-field class="half" appearance="outline" *ngIf="form.value.chart_type==='histogram'">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
           <mat-form-field class="half" appearance="outline" *ngIf="form.value.chart_type==='histogram'">
             <mat-label>Bins</mat-label>
@@ -129,11 +149,15 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
           <ng-container *ngIf="form.value.chart_type==='scatter_plot'">
             <mat-form-field class="half" appearance="outline">
               <mat-label>X Column</mat-label>
-              <input matInput formControlName="column1" />
+              <mat-select formControlName="column1">
+                <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+              </mat-select>
             </mat-form-field>
             <mat-form-field class="half" appearance="outline">
               <mat-label>Y Column</mat-label>
-              <input matInput formControlName="column2" />
+              <mat-select formControlName="column2">
+                <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+              </mat-select>
             </mat-form-field>
           </ng-container>
         </ng-container>
@@ -141,7 +165,9 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
         <ng-container *ngSwitchDefault>
           <mat-form-field class="half" appearance="outline" *ngIf="form.value.task?.startsWith('normalize')">
             <mat-label>Column</mat-label>
-            <input matInput formControlName="column" />
+            <mat-select formControlName="column">
+              <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+            </mat-select>
           </mat-form-field>
         </ng-container>
       </ng-container>
@@ -152,7 +178,19 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
 
     <div mat-dialog-content *ngIf="result()">
       <h3>Result</h3>
-      <pre style="white-space: pre-wrap;">{{ result() | json }}</pre>
+
+      <!-- Card-style summary -->
+      <div class="metrics" *ngIf="isObject(result()) && hasStats(result())">
+        <mat-card class="metric-card" *ngFor="let key of statKeys(result())">
+          <mat-card-title>{{ formatKey(key) }}</mat-card-title>
+          <mat-card-content>{{ result()[key] }}</mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Fallback JSON -->
+      <pre *ngIf="!hasStats(result())" style="white-space: pre-wrap;">
+        {{ result() | json }}
+      </pre>
     </div>
 
     <div mat-dialog-actions align="end">
@@ -163,6 +201,8 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
     .full { width: 100%; }
     .half { width: 49%; margin-right: 1%; }
     .mt { margin-top: 12px; }
+    .metrics { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .metric-card { flex: 1 1 150px; text-align: center; padding: 1rem; }
   `]
 })
 export class PreprocessDialogComponent {
@@ -186,7 +226,7 @@ export class PreprocessDialogComponent {
     chart_type: this.fb.control<string>('')
   });
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { filename: string }) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { filename: string, columns: string[] }) {
     this.filename.set(data.filename);
     this.form.patchValue({ filename: data.filename });
   }
@@ -232,5 +272,28 @@ export class PreprocessDialogComponent {
       error: (err) =>
         this.snack.open(err?.error?.error ?? 'Failed', 'Close', { duration: 3000 })
     });
+  }
+
+  // Helpers for card-style summary
+  isObject(val: any): boolean {
+    return val && typeof val === 'object' && !Array.isArray(val);
+  }
+
+  hasStats(res: any): boolean {
+    if (!this.isObject(res)) return false;
+    const keys = Object.keys(res);
+    return keys.some(k =>
+      ['mean','median','mode','std_dev','variance','min','max'].includes(k.toLowerCase())
+    );
+  }
+
+  statKeys(res: any): string[] {
+    return Object.keys(res).filter(k =>
+      ['mean','median','mode','std_dev','variance','min','max'].includes(k.toLowerCase())
+    );
+  }
+
+  formatKey(key: string): string {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 }

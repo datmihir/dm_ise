@@ -50,7 +50,7 @@
 
     <!-- Preview Table -->
     <div *ngIf="previewCols().length" class="table-wrap">
-      <h3>Preview of <strong>{{ filename() }}</strong> (First 20 Rows)</h3>
+      <h3>Preview of <strong>{{ filename() }}</strong> (First 10 Rows)</h3>
       <table mat-table [dataSource]="previewRows()" class="mat-elevation-z2">
         <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
           <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
@@ -61,6 +61,28 @@
       </table>
     </div>
   </section>
+  <!-- <div class="dataset-list">
+  <h2>Available Datasets</h2>
+  <mat-list>
+    <mat-list-item *ngFor="let ds of datasets()" (click)="selectDataset(ds)" style="cursor:pointer">
+      {{ ds }}
+    </mat-list-item>
+  </mat-list>
+</div> -->
+
+<!-- Preview Section -->
+<!-- <div *ngIf="previewCols().length">
+  <h3>Dataset Preview: {{ filename() }}</h3>
+  <table mat-table [dataSource]="previewRows()">
+    <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
+      <th mat-header-cell *matHeaderCellDef> {{ col }} </th>
+      <td mat-cell *matCellDef="let row"> {{ row[col] }} </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="previewCols()"></tr>
+    <tr mat-row *matRowDef="let row; columns: previewCols();"></tr>
+  </table>
+</div> -->
+
 
   <!-- Actions -->
   <section class="card" *ngIf="selectedDataset() && !uploading()">

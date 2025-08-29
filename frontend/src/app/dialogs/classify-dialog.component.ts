@@ -1,4 +1,3 @@
-
 // ------------------------------------------------------
 // file: src/app/dialogs/classify-dialog.component.ts
 // ------------------------------------------------------
@@ -10,13 +9,24 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-classify-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatSnackBarModule],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatSnackBarModule,
+    MatCardModule
+  ],
   template: `
     <h2 mat-dialog-title>Classification & Metrics</h2>
     <div mat-dialog-content [formGroup]="form">
@@ -32,9 +42,12 @@ import { ApiService } from '../services/api.service';
         </mat-select>
       </mat-form-field>
 
+      <!-- Target attribute for most classifiers -->
       <mat-form-field class="full" appearance="outline" *ngIf="form.value.task!=='linear_regression'">
         <mat-label>Target attribute</mat-label>
-        <input matInput formControlName="target_attribute" placeholder="e.g. species" />
+        <mat-select formControlName="target_attribute">
+          <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+        </mat-select>
       </mat-form-field>
 
       <!-- Decision Tree options -->
@@ -57,7 +70,8 @@ import { ApiService } from '../services/api.service';
         </mat-form-field>
         <mat-form-field class="full" appearance="outline">
           <mat-label>Test instance (JSON)</mat-label>
-          <textarea matInput rows="4" formControlName="test_instance" placeholder='{"sepal_length": 5.1, "sepal_width": 3.5}'></textarea>
+          <textarea matInput rows="4" formControlName="test_instance" 
+            placeholder='{"sepal_length": 5.1, "sepal_width": 3.5}'></textarea>
         </mat-form-field>
       </div>
 
@@ -65,7 +79,8 @@ import { ApiService } from '../services/api.service';
       <div *ngIf="form.value.task==='naive_bayes'">
         <mat-form-field class="full" appearance="outline">
           <mat-label>Test instance (JSON)</mat-label>
-          <textarea matInput rows="4" formControlName="test_instance" placeholder='{"feature1": 1.2, "feature2": 3.4}'></textarea>
+          <textarea matInput rows="4" formControlName="test_instance" 
+            placeholder='{"feature1": 1.2, "feature2": 3.4}'></textarea>
         </mat-form-field>
       </div>
 
@@ -73,7 +88,8 @@ import { ApiService } from '../services/api.service';
       <div *ngIf="form.value.task==='rule_based_1r'">
         <mat-form-field class="full" appearance="outline">
           <mat-label>Test instance (JSON)</mat-label>
-          <textarea matInput rows="4" formControlName="test_instance" placeholder='{"feature1": "value"}'></textarea>
+          <textarea matInput rows="4" formControlName="test_instance" 
+            placeholder='{"feature1": "value"}'></textarea>
         </mat-form-field>
       </div>
 
@@ -81,11 +97,15 @@ import { ApiService } from '../services/api.service';
       <div *ngIf="form.value.task==='linear_regression'">
         <mat-form-field class="half" appearance="outline">
           <mat-label>Independent attribute (X)</mat-label>
-          <input matInput formControlName="independent_attribute" />
+          <mat-select formControlName="independent_attribute">
+            <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+          </mat-select>
         </mat-form-field>
         <mat-form-field class="half" appearance="outline">
           <mat-label>Dependent attribute (Y)</mat-label>
-          <input matInput formControlName="dependent_attribute" />
+          <mat-select formControlName="dependent_attribute">
+            <mat-option *ngFor="let col of data.columns" [value]="col">{{ col }}</mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
 
@@ -107,7 +127,19 @@ import { ApiService } from '../services/api.service';
 
     <div mat-dialog-content *ngIf="result()">
       <h3>Result</h3>
-      <pre style="white-space: pre-wrap;">{{ result() | json }}</pre>
+
+      <!-- Card-style metrics -->
+      <div class="metrics" *ngIf="isObject(result()) && hasMetrics(result())">
+        <mat-card class="metric-card" *ngFor="let key of metricKeys(result())">
+          <mat-card-title>{{ formatKey(key) }}</mat-card-title>
+          <mat-card-content>{{ result()[key] }}</mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Fallback JSON -->
+      <pre *ngIf="!hasMetrics(result())" style="white-space: pre-wrap;">
+        {{ result() | json }}
+      </pre>
     </div>
 
     <div mat-dialog-actions align="end">
@@ -118,6 +150,8 @@ import { ApiService } from '../services/api.service';
     .full { width: 100%; }
     .half { width: 49%; margin-right: 1%; }
     .mt { margin-top: 12px; }
+    .metrics { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .metric-card { flex: 1 1 150px; text-align: center; padding: 1rem; }
   `]
 })
 export class ClassifyDialogComponent {
@@ -141,7 +175,7 @@ export class ClassifyDialogComponent {
     epochs: this.fb.control<number>(100)
   });
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { filename: string }) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { filename: string, columns: string[] }) {
     this.filename.set(data.filename);
     this.form.patchValue({ filename: data.filename });
   }
@@ -174,5 +208,28 @@ export class ClassifyDialogComponent {
       next: (res) => this.result.set(res),
       error: (err) => this.snack.open(err?.error?.error ?? 'Failed', 'Close', { duration: 3000 })
     });
+  }
+
+  // Helpers for card-style summary
+  isObject(val: any): boolean {
+    return val && typeof val === 'object' && !Array.isArray(val);
+  }
+
+  hasMetrics(res: any): boolean {
+    if (!this.isObject(res)) return false;
+    const keys = Object.keys(res);
+    return keys.some(k =>
+      ['accuracy','precision','recall','f1','rmse','mae','r2'].includes(k.toLowerCase())
+    );
+  }
+
+  metricKeys(res: any): string[] {
+    return Object.keys(res).filter(k =>
+      ['accuracy','precision','recall','f1','rmse','mae','r2'].includes(k.toLowerCase())
+    );
+  }
+
+  formatKey(key: string): string {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 }

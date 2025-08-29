@@ -69,10 +69,28 @@ export class AppComponent implements OnInit {
     });
   }
 
+  // selectDataset(dataset: Dataset) {
+  //   this.selectedDataset.set(dataset);
+  //   this.filename.set(dataset.filename);
+  // }
   selectDataset(dataset: Dataset) {
+
     this.selectedDataset.set(dataset);
     this.filename.set(dataset.filename);
+
+  // auto-load preview when selecting
+  this.uploading.set(true);
+  this.api.preview(dataset.filename).subscribe({
+    next: (p) => {
+      this.previewCols.set(p.header);
+      this.previewRows.set(p.data);
+      this.previewRows.set(p.data.slice(0, 10));
+      this.uploading.set(false);
+      },
+      error: () => this.uploading.set(false)
+    });
   }
+
 
   // ✅ File upload via hidden <input type="file">
   onFileSelected(event: Event) {
@@ -121,24 +139,32 @@ export class AppComponent implements OnInit {
 
   // ✅ Actions
   openPreprocess() {
-    if (!this.selectedDataset()) return;
-    this.dialog.open(PreprocessDialogComponent, {
-      width: '800px',
-      maxHeight: '90vh',
-      disableClose: true,
-      data: { filename: this.selectedDataset()!.filename }
-    });
-  }
+  if (!this.selectedDataset()) return;
+  this.dialog.open(PreprocessDialogComponent, {
+    width: '800px',
+    maxHeight: '90vh',
+    disableClose: true,
+    data: { 
+      filename: this.selectedDataset()!.filename,
+      columns: this.selectedDataset()!.columns   // 👈 added
+    }
+  });
+}
 
-  openClassify() {
-    if (!this.selectedDataset()) return;
-    this.dialog.open(ClassifyDialogComponent, {
-      width: '800px',
-      maxHeight: '90vh',
-      disableClose: true,
-      data: { filename: this.selectedDataset()!.filename }
-    });
-  }
+openClassify() {
+  if (!this.selectedDataset()) return;
+  this.dialog.open(ClassifyDialogComponent, {
+    width: '800px',
+    maxHeight: '90vh',
+    disableClose: true,
+    data: { 
+      filename: this.selectedDataset()!.filename,
+      columns: this.selectedDataset()!.columns   // 👈 added
+    }
+  });
+}
+
+  
 
   openHistory() {
     if (!this.selectedDataset()) return;
