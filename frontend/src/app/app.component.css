@@ -1,158 +1,136 @@
-:root {
-  --primary-color: #4f46e5;
-  --bg-color: #f3f4f6;
-  --card-bg: #ffffff;
-  --text-color: #1f2937;
-  --border-color: #e5e7eb;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
-            0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-}
-
-.container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 header {
+  /* position: relative; */
+  margin-top: 0;
   text-align: center;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2.5rem; */
 }
 
 header h1 {
+  margin-top: 0;
+  padding-top: 1rem;
   font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-color);
+}
+
+header p {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  color: var(--text-muted);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .content-grid {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
 .card {
   background-color: var(--card-bg);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-h2 {
+/* --- NEW: Style for the preview section specifically --- */
+.card.preview {
+    grid-column: 1 / -1; /* Makes the preview card span full width */
+}
+
+/* --- NEW: Style to make the table container scrollable --- */
+.preview-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+/* Ensure preview card + table use dark background */
+body.dark-mode .card.preview {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .mat-mdc-table {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .mat-mdc-row,
+body.dark-mode .mat-mdc-cell {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-top: 0;
-  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.75rem;
   margin-bottom: 1rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* File Upload Styles */
-.file-upload-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.file-upload-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+.actions-title {
   white-space: nowrap;
-  border-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.file-upload-label {
-  display: block;
-  padding: 1rem;
-  border: 2px dashed var(--border-color);
-  border-radius: 0.5rem;
+.placeholder-text {
   text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  font-weight: 500;
-  background-color: #fafafa;
+  padding: 2rem;
+  color: var(--text-muted);
 }
 
-.file-upload-label:hover {
-  border-color: var(--primary-color);
-  background-color: #f9fafb;
-}
-
-.file-upload-label span {
-  color: var(--text-color);
-}
-
-/* Style when file is chosen */
-.file-upload-label span:not(:empty) {
-  font-style: italic;
-  color: var(--primary-color);
-}
-
-/* Divider */
-.or-divider {
-  text-align: center;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-/* Table Preview */
-.table-wrap {
-  margin-top: 1rem;
-  overflow-x: auto;
-}
-
-table {
+.upload-card button {
   width: 100%;
-  border-collapse: collapse;
+  padding: 0.75rem;
 }
 
-th,
-td {
-  border: 1px solid var(--border-color);
-  padding: 6px 10px;
-  text-align: left;
-}
-
-.upload-status {
-  margin-top: 1rem;
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-/* Dataset List */
-mat-list-item {
-  cursor: pointer;
-  border-radius: 0.5rem;
-  margin-bottom: 0.25rem;
-  transition: background-color 0.2s ease;
-}
-
-mat-list-item:hover {
-  background-color: #f3f4f6;
-}
-
-mat-list-item.selected {
-  background-color: #e0e7ff;
-  border-left: 4px solid var(--primary-color);
-}
-
-/* Actions Section */
 .actions-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.actions-container button {
-  flex: 1;
-  min-width: 150px;
+.list-item-title {
+  font-weight: 500;
+}
+
+.list-item-line {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.columns-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
 }

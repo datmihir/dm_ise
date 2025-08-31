@@ -1,0 +1,75 @@
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar card">
+    <h2><mat-icon>folder</mat-icon> Datasets</h2>
+    <mat-list>
+      <mat-list-item 
+        *ngFor="let dataset of datasets()" 
+        (click)="selectDataset(dataset)"
+        [class.selected]="selectedDataset()?.filename === dataset.filename">
+        <mat-icon matListIcon>description</mat-icon>
+        <span matLine>{{ dataset.filename }}</span>
+      </mat-list-item>
+    </mat-list>
+
+    <button mat-stroked-button color="primary" (click)="openUploadDialog()">
+      <mat-icon>upload</mat-icon>
+      Upload Dataset
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <section class="card actions">
+      <h2><mat-icon>build</mat-icon> Actions</h2>
+      <button mat-raised-button color="primary" (click)="openPreprocess()" [disabled]="!selectedDataset()">
+        <mat-icon>tune</mat-icon>
+        Preprocess
+      </button>
+      <button mat-raised-button color="accent" (click)="openClassify()" [disabled]="!selectedDataset()">
+        <mat-icon>analytics</mat-icon>
+        Classify
+      </button>
+      <button mat-raised-button color="warn" (click)="openHistory()" [disabled]="!selectedDataset()">
+        <mat-icon>history</mat-icon>
+        History
+      </button>
+    </section>
+
+    <!-- Dataset Preview -->
+    <section class="card preview" *ngIf="selectedDataset()">
+      <h2>
+        <mat-icon>table_chart</mat-icon>
+        <span>Preview: {{ selectedDataset()?.filename }}</span>
+      </h2>
+
+      <!-- Loading indicator -->
+      <mat-progress-bar *ngIf="uploading()" mode="indeterminate"></mat-progress-bar>
+
+      <!-- Preview Table -->
+      <div class="preview-container" *ngIf="!uploading() && previewCols().length > 0">
+        <table mat-table [dataSource]="previewRows()" class="mat-elevation-z2">
+
+          <!-- Dynamic columns -->
+          <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
+            <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
+            <td mat-cell *matCellDef="let row">{{ row[col] }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="previewCols()"></tr>
+          <tr mat-row *matRowDef="let row; columns: previewCols();"></tr>
+        </table>
+      </div>
+
+      <!-- Empty state -->
+      <p *ngIf="!uploading() && previewCols().length === 0" class="placeholder-text">
+        No preview available.
+      </p>
+    </section>
+  </main>
+
+  <!-- Theme Toggle -->
+  <button mat-fab class="theme-toggle" (click)="toggleTheme()" [matTooltip]="'Toggle Theme'">
+    <mat-icon>{{ isDarkMode() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+  </button>
+</div>

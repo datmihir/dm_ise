@@ -7,6 +7,7 @@ import csv
 import json
 from .models import Dataset, AnalysisResult
 from . import processing_logic, classification_logic
+from . import evaluation_logic
 
 @csrf_exempt
 def upload_file(request):
@@ -249,3 +250,30 @@ def list_dataset_analyses(request, dataset_id):
         return JsonResponse(data, safe=False)
     except Dataset.DoesNotExist:
         return JsonResponse({'error': 'Dataset not found.'}, status=404)
+# Add this new function to the end of your api/views.py file
+
+@csrf_exempt
+def delete_dataset(request, dataset_id):
+    """
+    Deletes a dataset record from the database and its corresponding file.
+    """
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Only DELETE method is allowed'}, status=405)
+
+    try:
+        dataset = Dataset.objects.get(pk=dataset_id)
+        
+        # Construct file path and delete the physical file
+        file_path = os.path.join(settings.MEDIA_ROOT, dataset.filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+        # Delete the database record
+        dataset.delete()
+        
+        return JsonResponse({'message': f'Successfully deleted {dataset.filename}'}, status=200)
+        
+    except Dataset.DoesNotExist:
+        return JsonResponse({'error': 'Dataset not found.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

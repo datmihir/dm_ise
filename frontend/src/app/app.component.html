@@ -1,106 +1,94 @@
-<div class="container">
+<div class="main-container">
+  
+  <!-- Header -->
   <header>
-    <h1>Data Mining Tool</h1>
-    <p>Select or upload a dataset to begin pre-processing.</p>
-  </header>
-
-  <!-- Dataset Library -->
-  <section class="card">
-    <h2>Available Datasets</h2>
-    <mat-list role="list">
-      <mat-list-item
-        *ngFor="let ds of datasets()"
-        (click)="selectDataset(ds)"
-        [class.selected]="selectedDataset()?.id === ds.id"
-        role="listitem">
-
-        <mat-icon matListItemIcon>description</mat-icon>
-        <div matListItemTitle>{{ ds.filename }}</div>
-        <div matListItemLine>Uploaded: {{ ds.upload_date }}</div>
-        <div matListItemLine>Columns: {{ ds.columns.join(', ') }}</div>
-      </mat-list-item>
-    </mat-list>
-  </section>
-
-  <!-- Upload Section -->
-  <section class="card">
-    <h2>1. Upload Dataset</h2>
-    <div class="file-upload-wrapper">
-      <input
-        type="file"
-        id="file-upload"
-        accept=".csv"
-        class="file-upload-input"
-        (change)="onFileSelected($event)" />
-      <label for="file-upload" class="file-upload-label">
-        <span>{{ filename() || "Choose a CSV file..." }}</span>
-      </label>
-    </div>
-
-    <div class="or-divider">— OR —</div>
-
-    <button mat-stroked-button color="primary" (click)="openUploadDialog()">
-      Upload via Dialog
+    <h1>Data Mining</h1>
+    <p>ISE 1</p>
+    <button mat-icon-button (click)="toggleTheme()" class="theme-toggle" [attr.aria-label]="'Toggle ' + (isDarkMode() ? 'light' : 'dark') + ' mode'">
+      <mat-icon>{{ isDarkMode() ? 'dark_mode' : 'light_mode' }}</mat-icon>
     </button>
-
-    <div *ngIf="uploading()" class="upload-status">
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-      <span>Uploading and processing...</span>
+  </header>
+  
+  <div class="content-grid">
+    <!-- Left Column -->
+    <div class="left-column">
+      <section class="card">
+        <h2><mat-icon>folder_open</mat-icon> Dataset Library</h2>
+        <mat-list role="list" *ngIf="datasets().length > 0; else noDatasets">
+          <mat-list-item
+            *ngFor="let ds of datasets()"
+            (click)="selectDataset(ds)"
+            [class.selected]="selectedDataset()?.id === ds.id"
+            role="listitem">
+            <mat-icon matListItemIcon>description</mat-icon>
+            <div matListItemTitle class="list-item-title">{{ ds.filename }}</div>
+            <div matListItemLine class="list-item-line">Uploaded: {{ ds.upload_date }}</div>
+            <div matListItemLine class="list-item-line columns-line">Columns: {{ ds.columns.join(', ') }}</div>
+            
+            <!-- Add this delete button -->
+            <button mat-icon-button (click)="deleteDataset($event, ds.id)" class="delete-btn" matListItemMeta>
+                <mat-icon>delete_outline</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        <ng-template #noDatasets>
+            <p class="placeholder-text">No datasets uploaded yet. Click "Upload New" to get started.</p>
+        </ng-template>
+      </section>
     </div>
 
-    <!-- Preview Table -->
-    <div *ngIf="previewCols().length" class="table-wrap">
-      <h3>Preview of <strong>{{ filename() }}</strong> (First 10 Rows)</h3>
+    <!-- Right Column -->
+    <div class="right-column">
+       <section class="card upload-card">
+         <h2><mat-icon>upload_file</mat-icon> Upload Dataset</h2>
+         <button mat-flat-button color="primary" (click)="openUploadDialog()">
+           <mat-icon>add</mat-icon>
+           Upload New Dataset
+         </button>
+       </section>
+      
+       <section class="card" *ngIf="selectedDataset()">
+        <h2>
+          <mat-icon>settings_suggest</mat-icon> 
+          <span class="actions-title">Actions for: {{ selectedDataset()?.filename }}</span>
+        </h2>
+         <div class="actions-container">
+           <button mat-raised-button color="primary" (click)="openPreprocess()">
+             <mat-icon>tune</mat-icon>
+             Pre-process Data
+           </button>
+           <button mat-raised-button color="accent" (click)="openClassify()">
+             <mat-icon>model_training</mat-icon>
+             Classification
+           </button>
+           <button mat-stroked-button (click)="openHistory()">
+             <mat-icon>history</mat-icon>
+             View History
+           </button>
+         </div>
+       </section>
+    </div>
+  </div>
+  
+  <!-- Full-width Preview Section -->
+  <section class="card preview" *ngIf="selectedDataset()">
+    <h2>
+      <mat-icon>table_chart</mat-icon>
+      <span>Preview: {{ selectedDataset()?.filename }}</span>
+    </h2>
+    <mat-progress-bar *ngIf="uploading()" mode="indeterminate"></mat-progress-bar>
+    <div class="preview-container" *ngIf="!uploading() && previewCols().length > 0">
       <table mat-table [dataSource]="previewRows()" class="mat-elevation-z2">
         <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
           <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
           <td mat-cell *matCellDef="let row">{{ row[col] }}</td>
         </ng-container>
-        <tr mat-header-row *matHeaderRowDef="previewCols(); sticky: true"></tr>
+        <tr mat-header-row *matHeaderRowDef="previewCols()"></tr>
         <tr mat-row *matRowDef="let row; columns: previewCols();"></tr>
       </table>
     </div>
-  </section>
-  <!-- <div class="dataset-list">
-  <h2>Available Datasets</h2>
-  <mat-list>
-    <mat-list-item *ngFor="let ds of datasets()" (click)="selectDataset(ds)" style="cursor:pointer">
-      {{ ds }}
-    </mat-list-item>
-  </mat-list>
-</div> -->
-
-<!-- Preview Section -->
-<!-- <div *ngIf="previewCols().length">
-  <h3>Dataset Preview: {{ filename() }}</h3>
-  <table mat-table [dataSource]="previewRows()">
-    <ng-container *ngFor="let col of previewCols()" [matColumnDef]="col">
-      <th mat-header-cell *matHeaderCellDef> {{ col }} </th>
-      <td mat-cell *matCellDef="let row"> {{ row[col] }} </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="previewCols()"></tr>
-    <tr mat-row *matRowDef="let row; columns: previewCols();"></tr>
-  </table>
-</div> -->
-
-
-  <!-- Actions -->
-  <section class="card" *ngIf="selectedDataset() && !uploading()">
-    <h2>2. Actions</h2>
-    <p>
-      You can now perform operations on:
-      <strong>{{ selectedDataset()?.filename }}</strong>
+    <p *ngIf="!uploading() && previewCols().length === 0" class="placeholder-text">
+      No preview available.
     </p>
-    <div class="actions-container">
-      <button mat-raised-button color="primary" (click)="openPreprocess()">
-        Pre-process Data
-      </button>
-      <button mat-raised-button color="accent" (click)="openClassify()">
-        Classify Data
-      </button>
-      <button mat-raised-button color="warn" (click)="openHistory()">
-        View History
-      </button>
-    </div>
   </section>
 </div>

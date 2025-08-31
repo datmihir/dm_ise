@@ -70,4 +70,7 @@ export class ApiService {
   classify(payload: any): Observable<any> {
     return this.http.post<any>(`${this.BASE_URL}/classify/`, payload);
   }
+  deleteDataset(datasetId: number) {
+    return this.http.delete<any>(`${this.BASE_URL}/datasets/${datasetId}/delete/`);
+  }
 }

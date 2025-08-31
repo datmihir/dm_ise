@@ -9,4 +9,5 @@ urlpatterns = [
     path('classify/', views.classify_data, name='classify_data'),
     path('datasets/', views.list_datasets, name='list_datasets'),
     path('datasets/<int:dataset_id>/analyses/', views.list_dataset_analyses, name='list_dataset_analyses'),
+    path('datasets/<int:dataset_id>/delete/', views.delete_dataset, name='delete_dataset'),
 ]

@@ -1,18 +1,103 @@
+/* Import the prebuilt theme. */
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
-/* Global resets */
+/* ---- CSS Variables ---- */
+:root {
+  --primary-color: #4f46e5;
+  --accent-color: #db2777;
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-color: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --table-header-bg: #f9fafb;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+            0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+               0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ---- Dark Mode Theme ---- */
+body.dark-mode {
+  --bg-color: #000000;
+  --card-bg: #202228;
+  --text-color: #f0eda6; 
+  --text-muted: #9ca3af;
+  --border-color: #374151;
+  --table-header-bg: #2d3748;
+}
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+
+/* ---- Global Resets & Typography ---- */
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background: #f5f5f5;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* Force dataset library text to use theme colors in dark mode */
+body.dark-mode .mat-mdc-list-item-unscoped-content,
+body.dark-mode .mat-mdc-list-item-title,
+body.dark-mode .list-item-title,
+body.dark-mode .list-item-line {
+    color: var(--text-color) !important;
+}
+/* Override Angular Material Table background for dark mode */
+body.dark-mode {
+  --mdc-table-background-color: var(--card-bg);
+  --mat-table-row-item-outline-color: transparent;
+  --mat-table-row-hover-state-layer-color: rgba(255,255,255,0.05);
+  --mat-table-row-focus-state-layer-color: rgba(255,255,255,0.08);
 }
 
-/* Material overrides */
-.mat-toolbar {
-  background: #1976d2;
-  color: white;
+/* Ensure table cells inherit the theme */
+body.dark-mode .mat-mdc-cell,
+body.dark-mode .mat-mdc-header-cell {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* ---- Angular Material Global Overrides ---- */
+.mat-mdc-list-item {
+    background-color: var(--card-bg) !important;
+}
+.mat-mdc-list-item-unscoped-content {
+    color: var(--text-color) !important;
+}
+.mat-mdc-list-item:hover {
+    background-color: #b8b8ed !important;
+}
+.mat-mdc-list-item.selected {
+  background-color: var(--primary-color) !important;
+  color: rgb(253, 251, 251) !important;
+}
+.mat-mdc-list-item.selected .list-item-line,
+.mat-mdc-list-item.selected .mat-icon,
+.mat-mdc-list-item.selected .mat-mdc-list-item-title {
+    color: white !important;
+}
+.mat-mdc-list-item.selected:hover {
+    background-color: var(--primary-color) !important;
+}
+
+/* Table Dark Mode Styles */
+body.dark-mode .mat-mdc-table {
+    background-color: var(--card-bg);
+}
+body.dark-mode .mat-mdc-header-cell {
+    background-color: var(--table-header-bg);
+    color: var(--text-color);
+}
+body.dark-mode .mat-mdc-row,
+body.dark-mode .mat-mdc-cell {
+    color: var(--text-muted);
+    border-bottom-color: var(--border-color);
+}
