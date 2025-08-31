@@ -1,6 +1,3 @@
-// ------------------------------------------------------
-// file: src/app/dialogs/history-dialog.component.ts
-// ------------------------------------------------------
 import { Component, Inject, inject, signal, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';

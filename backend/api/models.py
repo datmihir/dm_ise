@@ -6,7 +6,6 @@ class Dataset(models.Model):
     """
     filename = models.CharField(max_length=255, unique=True)
     upload_date = models.DateTimeField(auto_now_add=True)
-    # Storing column headers as a JSON string
     columns = models.JSONField(default=list)
 
     def __str__(self):

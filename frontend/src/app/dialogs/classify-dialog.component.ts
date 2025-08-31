@@ -1,6 +1,3 @@
-// ------------------------------------------------------
-// file: src/app/dialogs/classify-dialog.component.ts
-// ------------------------------------------------------
 import { Component, Inject, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -128,7 +125,6 @@ import { ApiService } from '../services/api.service';
     <div mat-dialog-content *ngIf="result()">
       <h3>Result</h3>
 
-      <!-- Card-style metrics -->
       <div class="metrics" *ngIf="isObject(result()) && hasMetrics(result())">
         <mat-card class="metric-card" *ngFor="let key of metricKeys(result())">
           <mat-card-title>{{ formatKey(key) }}</mat-card-title>
@@ -136,7 +132,6 @@ import { ApiService } from '../services/api.service';
         </mat-card>
       </div>
 
-      <!-- Fallback JSON -->
       <pre *ngIf="!hasMetrics(result())" style="white-space: pre-wrap;">
         {{ result() | json }}
       </pre>

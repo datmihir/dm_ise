@@ -1,22 +1,18 @@
-# backend/mlapp/evaluation_logic.py
-
 import random
 from collections import Counter
 from . import classification_logic
 
 def train_test_split(dataset, test_size=0.2):
-    """Split dataset into train and test sets."""
     data = dataset[:]
     random.shuffle(data)
     split_idx = int(len(data) * (1 - test_size))
     return data[:split_idx], data[split_idx:]
 
 def predict_with_tree(tree, instance, default=None):
-    """Traverse the decision tree to classify a single instance."""
     if not isinstance(tree, dict):
-        return tree  # Leaf node
+        return tree  
 
-    attr = next(iter(tree))  # First attribute
+    attr = next(iter(tree))  
     if attr not in instance:
         return default
 
@@ -27,7 +23,6 @@ def predict_with_tree(tree, instance, default=None):
         return default
 
 def generate_confusion_matrix(predictions, actual, class_labels):
-    """Generate a confusion matrix with labels and matrix structure."""
     matrix = [[0 for _ in class_labels] for _ in class_labels]
     label_to_idx = {label: i for i, label in enumerate(class_labels)}
 
@@ -41,7 +36,6 @@ def generate_confusion_matrix(predictions, actual, class_labels):
     }
 
 def evaluate_model(dataset, task, params):
-    """Train and evaluate models with accuracy and confusion matrix."""
     if not dataset:
         return {'error': 'Dataset is empty.'}
 
@@ -64,7 +58,6 @@ def evaluate_model(dataset, task, params):
             processed_train_data, attributes, target_attr, split_criterion
         )
 
-        # Predictions for test data
         for row in test_data:
             pred = predict_with_tree(model, row, default=random.choice(class_labels))
             predictions.append(pred)
@@ -93,16 +86,14 @@ def evaluate_model(dataset, task, params):
     else:
         return {'error': f'Unsupported task: {task}'}
 
-    # --- Calculate accuracy ---
     correct = sum(1 for p, a in zip(predictions, actual) if p == a)
     accuracy = round(correct / len(actual) * 100, 2) if actual else 0
 
-    # --- Confusion matrix ---
     confusion_matrix = generate_confusion_matrix(predictions, actual, class_labels)
 
     return {
         'task': task,
         'accuracy': accuracy,
         'confusion_matrix': confusion_matrix,
-        'sample_predictions': list(zip(predictions[:10], actual[:10]))  # preview
+        'sample_predictions': list(zip(predictions[:10], actual[:10])) 
     }

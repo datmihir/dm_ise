@@ -16,15 +16,14 @@ Including another URLconf
 """
 # in dm_project/urls.py
 from django.contrib import admin
-from django.urls import path, include # Make sure include is imported
-from django.conf import settings # new import
-from django.conf.urls.static import static # new import
+from django.urls import path, include 
+from django.conf import settings 
+from django.conf.urls.static import static 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')), # Add this line to include your app's URLs
+    path('api/', include('api.urls')), 
 ]
 
-# Add this line at the end
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

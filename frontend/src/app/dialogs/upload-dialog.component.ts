@@ -1,6 +1,3 @@
-// ------------------------------------------------------
-// file: src/app/dialogs/upload-dialog.component.ts
-// ------------------------------------------------------
 import { Component, Inject, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -59,7 +56,6 @@ export class UploadDialogComponent {
     this.uploading.set(true);
     this.api.upload(file).subscribe({
       next: (res) => {
-        // Extract filename from /media/filename.csv
         const parts = res.file_url.split('/');
         const fn = decodeURIComponent(parts[parts.length - 1]);
         this.filename.set(fn);

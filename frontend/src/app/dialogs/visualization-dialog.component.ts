@@ -1,6 +1,3 @@
-// ------------------------------------------------------
-// file: src/app/dialogs/visualization-dialog.component.ts
-// ------------------------------------------------------
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,7 +24,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
           yAxisLabel="Frequency">
         </ngx-charts-bar-vertical>
 
-        <!-- Scatter Plot (implemented with bubble chart) -->
+        <!-- Scatter Plot-->
         <ngx-charts-bubble-chart
           *ngSwitchCase="'scatter_plot'"
           [results]="chartData"
@@ -58,7 +55,6 @@ export class VisualizationDialogComponent {
   chartData: any[] = [];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
-    // Format the backend data into the format ngx-charts expects
     if (data.chart_type === 'histogram') {
       this.chartData = data.chart_data.labels.map((label: string, index: number) => ({
         name: label,
@@ -68,10 +64,10 @@ export class VisualizationDialogComponent {
       this.chartData = [{
         name: `${data.params.column1} vs ${data.params.column2}`,
         series: data.chart_data.map((point: any, index: number) => ({
-          name: `${index}`,  // required string identifier
+          name: `${index}`,  
           x: point.x,
           y: point.y,
-          r: 5               // constant radius to mimic scatter plot
+          r: 5               
         }))
       }];
     }

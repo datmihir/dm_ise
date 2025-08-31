@@ -70,18 +70,15 @@ export class AppComponent implements OnInit {
 
   selectDataset(dataset: Dataset) {
     this.selectedDataset.set(dataset);
-    // --- THIS IS THE KEY CHANGE ---
-    // Fetch the preview for the selected dataset
     this.fetchPreview(dataset.filename);
   }
 
-  // --- NEW HELPER FUNCTION TO FETCH PREVIEW ---
   fetchPreview(filename: string) {
     this.uploading.set(true);
     this.api.preview(filename).subscribe({
       next: (p) => {
         this.previewCols.set(p.header);
-        this.previewRows.set(p.data.slice(0, 10)); // only first 10 rows
+        this.previewRows.set(p.data.slice(0, 10)); 
         this.uploading.set(false);
       },
       error: () => {
@@ -91,7 +88,6 @@ export class AppComponent implements OnInit {
     });
   }
 
-  // ✅ Upload via Dialog
   openUploadDialog() {
     const dialogRef = this.dialog.open(UploadDialogComponent, { width: '800px' });
     dialogRef.afterClosed().subscribe(result => {
@@ -104,7 +100,6 @@ export class AppComponent implements OnInit {
     });
   }
 
-  // ✅ Actions
   openPreprocess() {
     if (!this.selectedDataset()) return;
     this.dialog.open(PreprocessDialogComponent, {
@@ -140,7 +135,6 @@ export class AppComponent implements OnInit {
     });
   }
 
-  // ✅ Theme toggle
   toggleTheme() {
     this.isDarkMode.update(value => !value);
     if (this.isDarkMode()) {
@@ -153,14 +147,14 @@ export class AppComponent implements OnInit {
   }
 
   deleteDataset(event: MouseEvent, datasetId: number) {
-    event.stopPropagation(); // Prevents the list item's click event from firing
+    event.stopPropagation(); 
 
     if (confirm('Are you sure you want to delete this dataset? This action cannot be undone.')) {
       this.api.deleteDataset(datasetId).subscribe({
         next: () => {
           this.snackBar.open('Dataset deleted successfully.', 'Close', { duration: 3000 });
           this.loadDatasets();
-          this.selectedDataset.set(null); // Deselect if it was the active one
+          this.selectedDataset.set(null); 
         },
         error: (err) => {
           this.snackBar.open(err?.error?.error ?? 'Failed to delete dataset.', 'Close', { duration: 3000 });

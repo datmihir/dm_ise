@@ -1,6 +1,3 @@
-// ------------------------------------------------------
-// file: src/app/dialogs/preprocess-dialog.component.ts
-// ------------------------------------------------------
 import { Component, Inject, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -49,7 +46,6 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
         </mat-select>
       </mat-form-field>
 
-      <!-- dynamic fields -->
       <ng-container [ngSwitch]="form.value.task">
         <ng-container *ngSwitchCase="'central_tendency'">
           <mat-form-field class="half" appearance="outline">
@@ -179,7 +175,6 @@ import { VisualizationDialogComponent } from './visualization-dialog.component';
     <div mat-dialog-content *ngIf="result()">
       <h3>Result</h3>
 
-      <!-- Card-style summary -->
       <div class="metrics" *ngIf="isObject(result()) && hasStats(result())">
         <mat-card class="metric-card" *ngFor="let key of statKeys(result())">
           <mat-card-title>{{ formatKey(key) }}</mat-card-title>

@@ -3,8 +3,6 @@ import os
 import math
 from collections import Counter
 
-# --- Helper Functions ---
-
 def load_column_data(file_path, column_name):
     """Loads a specific column from a CSV file, converting to float if possible."""
     if not os.path.exists(file_path):
@@ -20,7 +18,7 @@ def load_column_data(file_path, column_name):
             try:
                 column_data.append(float(row[column_name]))
             except (ValueError, TypeError):
-                pass # Skip non-numeric data
+                pass 
     return column_data
 
 def load_full_data(file_path):
@@ -41,7 +39,6 @@ def load_full_data(file_path):
             dataset.append(processed_row)
     return dataset
 
-# --- Statistical Calculation Functions (Existing) ---
 
 def calculate_mean(data):
     if not data: return 0
@@ -77,8 +74,6 @@ def calculate_correlation(data1, data2):
     std_dev1, std_dev2 = calculate_std_dev(data1), calculate_std_dev(data2)
     if std_dev1 == 0 or std_dev2 == 0: return 0
     return calculate_covariance(data1, data2) / (std_dev1 * std_dev2)
-
-# --- Normalization and Discretization (Existing) ---
 
 def normalize_min_max(dataset, column):
     values = [row[column] for row in dataset if isinstance(row.get(column), (int, float))]
@@ -134,7 +129,6 @@ def discretize_by_binning(dataset, column, num_bins):
                     break
     return dataset
 
-# --- NEW: Data Cleaning ---
 
 def handle_missing_values(dataset, method, column=None):
     """Handles missing values by removing rows or filling with mean."""
@@ -154,7 +148,6 @@ def handle_missing_values(dataset, method, column=None):
     else:
         raise ValueError(f"Unknown missing value method: {method}")
 
-# --- NEW: Chi-Square Test ---
 
 def calculate_chi_square(dataset, column1, column2):
     """Calculates the Chi-square statistic for two categorical columns."""
@@ -184,7 +177,6 @@ def calculate_chi_square(dataset, column1, column2):
         table_for_json.append(row)
     return chi_square_stat, df, table_for_json
 
-# --- NEW: Visualization Data Preparation ---
 
 def prepare_histogram_data(dataset, column, num_bins):
     """Prepares data for a histogram by binning a numerical column."""

@@ -43,9 +43,13 @@ def preprocess_for_tree(dataset, attributes):
     """Discretizes all numeric attributes in the dataset for the decision tree."""
     processed_dataset = copy.deepcopy(dataset)
     for attr in attributes:
-        unique_values = set(row[attr] for row in processed_dataset if isinstance(row.get(attr), (int, float)))
-        if len(unique_values) > 5:
-            _discretize_column(processed_dataset, attr)
+        # Check if the column is likely numeric and continuous
+        if any(isinstance(row.get(attr), float) for row in processed_dataset):
+             _discretize_column(processed_dataset, attr)
+        else: # For integer types, check if there are many unique values
+            unique_values = set(row[attr] for row in processed_dataset if isinstance(row.get(attr), int))
+            if len(unique_values) > 5: # Threshold for when to discretize integers
+                _discretize_column(processed_dataset, attr)
     return processed_dataset
 
 def calculate_entropy(data, target_attr):
@@ -100,17 +104,13 @@ def calculate_gini_gain(data, attribute, target_attr):
     return total_gini - weighted_gini
 
 def find_best_attribute(data, attributes, target_attr, split_criterion):
-    """
-    Finds the best attribute to split on based on the chosen criterion.
-    --- THIS FUNCTION IS NOW CORRECTED ---
-    """
     gains = {}
     for attribute in attributes:
         if split_criterion == 'information_gain':
             gains[attribute] = calculate_information_gain(data, attribute, target_attr)
         elif split_criterion == 'gini_index':
             gains[attribute] = calculate_gini_gain(data, attribute, target_attr)
-        elif split_criterion == 'gain_ratio': # <-- THIS CASE WAS MISSING
+        elif split_criterion == 'gain_ratio':
             gains[attribute] = calculate_gain_ratio(data, attribute, target_attr)
             
     return max(gains, key=gains.get) if gains else None
@@ -131,7 +131,7 @@ def build_decision_tree(data, attributes, target_attr, split_criterion):
         tree[best_attribute][value] = build_decision_tree(subset, remaining_attributes, target_attr, split_criterion) if subset else Counter(target_values).most_common(1)[0][0]
     return tree
 
-# --- Other Classifiers (Unchanged) ---
+# --- Other Classifiers ---
 def predict_knn(train_data, test_instance, k, attributes, target_attr):
     distances = sorted([(train_row, euclidean_distance(train_row, test_instance, attributes)) for train_row in train_data], key=lambda x: x[1])
     neighbors = [d[0] for d in distances[:k]]
@@ -179,8 +179,36 @@ def train_1r(train_data, attributes, target_attr):
             min_error, best_attribute, best_rules = error, attr, rules
     return {'attribute': best_attribute, 'rules': best_rules, 'error_rate': min_error / len(train_data)}
 
+# --- THIS IS THE CORRECTED 1R PREDICTION FUNCTION ---
 def predict_1r(model, test_instance):
-    return model['rules'].get(test_instance.get(model['attribute']), "Unknown")
+    """Predicts using the trained 1R model by checking numeric ranges."""
+    attr_to_use = model.get('attribute')
+    if not attr_to_use:
+        return "Unknown (Model has no attribute)"
+
+    test_value = test_instance.get(attr_to_use)
+    if test_value is None:
+        return "Unknown (Attribute missing in test instance)"
+
+    rules = model.get('rules', {})
+    
+    # Handle numeric attributes by checking ranges
+    if isinstance(test_value, (int, float)):
+        for interval, label in rules.items():
+            # Check if the key is a string representation of an interval
+            if isinstance(interval, str) and interval.startswith('[') and '-' in interval:
+                try:
+                    # Parse the interval string like "[0.10-0.70]"
+                    low_str, high_str = interval.strip("[]").split('-')
+                    low = float(low_str)
+                    high = float(high_str)
+                    if low <= test_value <= high:
+                        return label
+                except (ValueError, IndexError):
+                    continue # Skip malformed rule keys
+    
+    # Fallback for exact match (for categorical data) or if range check fails
+    return rules.get(test_value, "Unknown (No rule for this value)")
 
 def train_linear_regression(dataset, independent_attr, dependent_attr):
     x = [row[independent_attr] for row in dataset if isinstance(row.get(independent_attr), (int, float))]

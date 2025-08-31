@@ -1,11 +1,7 @@
-// ------------------------------------------------------
-// File: src/app/services/api.service.ts
-// ------------------------------------------------------
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-// --- Strong typing for clarity ---
 export interface Dataset {
   id: number;
   filename: string;
@@ -39,7 +35,6 @@ export class ApiService {
   private http = inject(HttpClient);
   private readonly BASE_URL = 'http://127.0.0.1:8000/api';
 
-  // ✅ Dataset Library
   getDatasets(): Observable<Dataset[]> {
     return this.http.get<Dataset[]>(`${this.BASE_URL}/datasets/`);
   }
@@ -48,21 +43,18 @@ export class ApiService {
     return this.http.get<Analysis[]>(`${this.BASE_URL}/datasets/${datasetId}/analyses/`);
   }
 
-  // ✅ Upload
   upload(file: File): Observable<UploadResponse> {
     const form = new FormData();
     form.append('dataset', file);
     return this.http.post<UploadResponse>(`${this.BASE_URL}/upload/`, form);
   }
 
-  // ✅ Preview
   preview(filename: string): Observable<PreviewResponse> {
     return this.http.get<PreviewResponse>(
       `${this.BASE_URL}/preview/${encodeURIComponent(filename)}/`
     );
   }
 
-  // ✅ Processing
   process(payload: any): Observable<any> {
     return this.http.post<any>(`${this.BASE_URL}/process/`, payload);
   }
