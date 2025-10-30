@@ -139,6 +139,7 @@ def process_data(request):
             columns = params.get('columns', [])
             k = int(params.get('k', 3))
             max_iter = int(params.get('max_iter', 100))
+            dataset = processing_logic.load_full_data(file_path)
             if not columns:
                 return JsonResponse({'error': 'Missing columns for clustering'}, status=400)
             if algo == 'kmeans':
@@ -154,6 +155,7 @@ def process_data(request):
             min_support = float(params.get('min_support', 0.1))
             min_confidence = float(params.get('min_confidence', 0.6))
             max_len = int(params.get('max_len', 3))
+            dataset = processing_logic.load_full_data(file_path)
             if not columns:
                 return JsonResponse({'error': 'Missing columns for apriori'}, status=400)
             result = processing_logic.apriori(dataset, columns, min_support=min_support, min_confidence=min_confidence, max_len=max_len)
@@ -163,6 +165,7 @@ def process_data(request):
             source_col = params.get('source_column')
             target_col = params.get('target_column')
             damping = float(params.get('damping', 0.85))
+            dataset = processing_logic.load_full_data(file_path)
             if not all([source_col, target_col]):
                 return JsonResponse({'error': 'Missing source_column or target_column for pagerank'}, status=400)
             result = processing_logic.pagerank_from_edges(dataset, source_col, target_col, damping=damping)
@@ -171,6 +174,7 @@ def process_data(request):
             params = body.get('params', {})
             source_col = params.get('source_column')
             target_col = params.get('target_column')
+            dataset = processing_logic.load_full_data(file_path)
             if not all([source_col, target_col]):
                 return JsonResponse({'error': 'Missing source_column or target_column for hits'}, status=400)
             result = processing_logic.hits_from_edges(dataset, source_col, target_col)
