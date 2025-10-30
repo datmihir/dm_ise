@@ -15,6 +15,7 @@ import { PreprocessDialogComponent } from './dialogs/preprocess-dialog.component
 import { ClassifyDialogComponent } from './dialogs/classify-dialog.component';
 import { UploadDialogComponent } from './dialogs/upload-dialog.component';
 import { HistoryDialogComponent } from './dialogs/history-dialog.component';
+import { MiningDialogComponent } from './dialogs/mining-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -120,6 +121,19 @@ export class AppComponent implements OnInit {
       maxHeight: '90vh',
       disableClose: true,
       data: { 
+        filename: this.selectedDataset()!.filename,
+        columns: this.selectedDataset()!.columns
+      }
+    });
+  }
+
+  openMining() {
+    if (!this.selectedDataset()) return;
+    this.dialog.open(MiningDialogComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+      disableClose: true,
+      data: {
         filename: this.selectedDataset()!.filename,
         columns: this.selectedDataset()!.columns
       }

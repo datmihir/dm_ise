@@ -132,6 +132,49 @@ def process_data(request):
                 chart_data = processing_logic.prepare_scatter_plot_data(dataset, col1, col2)
                 result = {'task': 'Visualization', 'chart_type': 'scatter_plot', 'chart_data': chart_data}
 
+        elif task == 'clustering':
+            # params: algorithm ('kmeans'|'kmedoid'), columns: [col1,col2,..], k, max_iter
+            params = body.get('params', {})
+            algo = params.get('algorithm')
+            columns = params.get('columns', [])
+            k = int(params.get('k', 3))
+            max_iter = int(params.get('max_iter', 100))
+            if not columns:
+                return JsonResponse({'error': 'Missing columns for clustering'}, status=400)
+            if algo == 'kmeans':
+                result = processing_logic.k_means(dataset, columns, k=k, max_iter=max_iter)
+            elif algo == 'kmedoid' or algo == 'k-medoid':
+                result = processing_logic.k_medoid(dataset, columns, k=k, max_iter=max_iter)
+            else:
+                return JsonResponse({'error': 'Unknown clustering algorithm'}, status=400)
+
+        elif task == 'apriori':
+            params = body.get('params', {})
+            columns = params.get('columns', [])
+            min_support = float(params.get('min_support', 0.1))
+            min_confidence = float(params.get('min_confidence', 0.6))
+            max_len = int(params.get('max_len', 3))
+            if not columns:
+                return JsonResponse({'error': 'Missing columns for apriori'}, status=400)
+            result = processing_logic.apriori(dataset, columns, min_support=min_support, min_confidence=min_confidence, max_len=max_len)
+
+        elif task == 'pagerank':
+            params = body.get('params', {})
+            source_col = params.get('source_column')
+            target_col = params.get('target_column')
+            damping = float(params.get('damping', 0.85))
+            if not all([source_col, target_col]):
+                return JsonResponse({'error': 'Missing source_column or target_column for pagerank'}, status=400)
+            result = processing_logic.pagerank_from_edges(dataset, source_col, target_col, damping=damping)
+
+        elif task == 'hits':
+            params = body.get('params', {})
+            source_col = params.get('source_column')
+            target_col = params.get('target_column')
+            if not all([source_col, target_col]):
+                return JsonResponse({'error': 'Missing source_column or target_column for hits'}, status=400)
+            result = processing_logic.hits_from_edges(dataset, source_col, target_col)
+
         if result:
             AnalysisResult.objects.create(dataset=dataset_obj, task_name=task, task_parameters=body, result=result)
         

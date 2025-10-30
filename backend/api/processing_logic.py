@@ -197,3 +197,279 @@ def prepare_histogram_data(dataset, column, num_bins):
 def prepare_scatter_plot_data(dataset, column1, column2):
     """Prepares data for a scatter plot from two numerical columns."""
     return [{'x': row.get(column1), 'y': row.get(column2)} for row in dataset if isinstance(row.get(column1), (int, float)) and isinstance(row.get(column2), (int, float))]
+
+
+# -----------------------------
+# Clustering: k-Means & k-Medoid
+# -----------------------------
+def _extract_numeric_matrix(dataset, columns):
+    matrix = []
+    for row in dataset:
+        vec = []
+        ok = True
+        for c in columns:
+            val = row.get(c)
+            if isinstance(val, (int, float)):
+                vec.append(float(val))
+            else:
+                ok = False
+                break
+        if ok:
+            matrix.append(vec)
+    return matrix
+
+def _euclidean(a, b):
+    return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))
+
+def k_means(dataset, columns, k=3, max_iter=100):
+    """Simple k-means implementation operating on selected numeric columns."""
+    matrix = _extract_numeric_matrix(dataset, columns)
+    if not matrix: return {'error': 'No numeric data found for selected columns.'}
+
+    import random
+    n = len(matrix)
+    dim = len(matrix[0])
+    # initialize centroids randomly
+    centroids = [matrix[i][:] for i in random.sample(range(n), min(k, n))]
+
+    for it in range(max_iter):
+        clusters = [[] for _ in range(len(centroids))]
+        for vec in matrix:
+            dists = [_euclidean(vec, c) for c in centroids]
+            idx = dists.index(min(dists))
+            clusters[idx].append(vec)
+
+        moved = False
+        for i, cluster in enumerate(clusters):
+            if not cluster: continue
+            new_centroid = [sum(col) / len(cluster) for col in zip(*cluster)]
+            if any(abs(a - b) > 1e-6 for a, b in zip(new_centroid, centroids[i])):
+                centroids[i] = new_centroid
+                moved = True
+        if not moved:
+            break
+
+    # Map input rows to cluster indexes for a simple response (first N rows considered)
+    assignments = []
+    for vec in matrix:
+        dists = [_euclidean(vec, c) for c in centroids]
+        assignments.append(dists.index(min(dists)))
+
+    return {'task': 'k_means', 'k': len(centroids), 'centroids': centroids, 'assignments_sample': assignments[:200]}
+
+
+def k_medoid(dataset, columns, k=3, max_iter=100):
+    """Simple k-medoid (PAM-like) implementation on selected numeric columns."""
+    matrix = _extract_numeric_matrix(dataset, columns)
+    if not matrix: return {'error': 'No numeric data found for selected columns.'}
+
+    import random
+    n = len(matrix)
+    if k >= n:
+        # trivial: each point is a medoid
+        return {'task': 'k_medoid', 'k': n, 'medoids': matrix, 'assignments_sample': list(range(n))}
+
+    medoid_indices = random.sample(range(n), k)
+    medoids = [matrix[i] for i in medoid_indices]
+
+    for it in range(max_iter):
+        clusters = [[] for _ in range(k)]
+        for idx, vec in enumerate(matrix):
+            dists = [_euclidean(vec, m) for m in medoids]
+            mi = dists.index(min(dists))
+            clusters[mi].append(idx)
+
+        changed = False
+        for i, cluster in enumerate(clusters):
+            if not cluster: continue
+            # pick the medoid as the point minimizing total distance to others
+            best_idx, best_cost = None, float('inf')
+            for candidate_idx in cluster:
+                cost = sum(_euclidean(matrix[candidate_idx], matrix[j]) for j in cluster)
+                if cost < best_cost:
+                    best_cost = cost
+                    best_idx = candidate_idx
+            if best_idx is not None and matrix[best_idx] != medoids[i]:
+                medoids[i] = matrix[best_idx]
+                changed = True
+        if not changed:
+            break
+
+    assignments = []
+    for vec in matrix:
+        dists = [_euclidean(vec, m) for m in medoids]
+        assignments.append(dists.index(min(dists)))
+
+    return {'task': 'k_medoid', 'k': k, 'medoids': medoids, 'assignments_sample': assignments[:200]}
+
+
+# -----------------------------
+# Association Rules: Apriori
+# -----------------------------
+def apriori(dataset, columns, min_support=0.1, min_confidence=0.6, max_len=3):
+    """A small Apriori implementation treating each row as a transaction made of selected column values.
+    Values are used as items; to avoid collisions item names are prefixed by column name.
+    """
+    transactions = []
+    for row in dataset:
+        items = []
+        for c in columns:
+            val = row.get(c)
+            if val is not None and str(val).strip() != '':
+                items.append(f"{c}={val}")
+        if items:
+            transactions.append(set(items))
+
+    n = len(transactions)
+    if n == 0:
+        return {'error': 'No transactions created from selected columns.'}
+
+    # support counting
+    def support(itemset):
+        cnt = sum(1 for t in transactions if itemset.issubset(t))
+        return cnt / n
+
+    # generate frequent itemsets
+    freq_itemsets = {}
+    # L1
+    C1 = {}
+    for t in transactions:
+        for item in t:
+            C1[item] = C1.get(item, 0) + 1
+    L1 = {frozenset([item]): cnt / n for item, cnt in C1.items() if (cnt / n) >= min_support}
+    current_L = set(L1.keys())
+    freq_itemsets.update(L1)
+
+    k = 2
+    while current_L and k <= max_len:
+        # candidate generation (join)
+        candidates = set()
+        cur_list = list(current_L)
+        for i in range(len(cur_list)):
+            for j in range(i + 1, len(cur_list)):
+                union = cur_list[i].union(cur_list[j])
+                if len(union) == k:
+                    candidates.add(frozenset(union))
+
+        next_L = set()
+        for cand in candidates:
+            sup = sum(1 for t in transactions if cand.issubset(t)) / n
+            if sup >= min_support:
+                freq_itemsets[cand] = sup
+                next_L.add(cand)
+        current_L = next_L
+        k += 1
+
+    # generate rules
+    rules = []
+    for itemset, sup in list(freq_itemsets.items()):
+        if len(itemset) < 2: continue
+        items = list(itemset)
+        # all non-empty proper subsets
+        from itertools import combinations
+        for r in range(1, len(items)):
+            for antecedent in combinations(items, r):
+                A = frozenset(antecedent)
+                C = itemset.difference(A)
+                if not C: continue
+                conf = support(itemset) / support(A)
+                if conf >= min_confidence:
+                    rules.append({'antecedent': list(A), 'consequent': list(C), 'support': round(sup, 4), 'confidence': round(conf, 4)})
+
+    return {'task': 'apriori', 'frequent_itemsets': {', '.join(list(k)): v for k, v in freq_itemsets.items()}, 'rules': rules}
+
+
+# -----------------------------
+# Web Mining: PageRank & HITS
+# -----------------------------
+def pagerank_from_edges(dataset, source_col, target_col, damping=0.85, max_iter=100, tol=1e-6):
+    edges = []
+    for row in dataset:
+        s = row.get(source_col); t = row.get(target_col)
+        if s is None or t is None: continue
+        edges.append((str(s), str(t)))
+
+    nodes = set([u for u, v in edges] + [v for u, v in edges])
+    if not nodes:
+        return {'error': 'No edges found using selected columns.'}
+
+    node_list = list(nodes)
+    idx = {n: i for i, n in enumerate(node_list)}
+    N = len(node_list)
+
+    out_links = {n: set() for n in node_list}
+    in_links = {n: set() for n in node_list}
+    for u, v in edges:
+        out_links[u].add(v)
+        in_links[v].add(u)
+
+    pr = {n: 1.0 / N for n in node_list}
+    for it in range(max_iter):
+        new_pr = {}
+        diff = 0.0
+        for n in node_list:
+            rank = (1 - damping) / N
+            rank += damping * sum(pr.get(q, 0.0) / max(1, len(out_links[q])) for q in in_links[n])
+            new_pr[n] = rank
+            diff += abs(rank - pr[n])
+        pr = new_pr
+        if diff < tol:
+            break
+
+    # return sorted
+    sorted_pr = sorted(pr.items(), key=lambda x: x[1], reverse=True)
+    return {'task': 'pagerank', 'scores': [{ 'node': n, 'score': round(s, 6)} for n, s in sorted_pr]}
+
+
+def hits_from_edges(dataset, source_col, target_col, max_iter=100, tol=1e-6):
+    edges = []
+    for row in dataset:
+        s = row.get(source_col); t = row.get(target_col)
+        if s is None or t is None: continue
+        edges.append((str(s), str(t)))
+
+    nodes = set([u for u, v in edges] + [v for u, v in edges])
+    if not nodes:
+        return {'error': 'No edges found using selected columns.'}
+
+    node_list = list(nodes)
+    in_links = {n: set() for n in node_list}
+    out_links = {n: set() for n in node_list}
+    for u, v in edges:
+        out_links[u].add(v)
+        in_links[v].add(u)
+
+    auth = {n: 1.0 for n in node_list}
+    hub = {n: 1.0 for n in node_list}
+    for it in range(max_iter):
+        # update authority
+        new_auth = {}
+        for n in node_list:
+            new_auth[n] = sum(hub.get(q, 0.0) for q in in_links[n])
+        # normalize
+        norm = math.sqrt(sum(v * v for v in new_auth.values())) or 1.0
+        for n in node_list:
+            new_auth[n] /= norm
+
+        # update hub
+        new_hub = {}
+        for n in node_list:
+            new_hub[n] = sum(new_auth.get(q, 0.0) for q in out_links[n])
+        norm2 = math.sqrt(sum(v * v for v in new_hub.values())) or 1.0
+        for n in node_list:
+            new_hub[n] /= norm2
+
+        # check convergence
+        diff = sum(abs(new_auth[n] - auth.get(n, 0.0)) for n in node_list) + sum(abs(new_hub[n] - hub.get(n, 0.0)) for n in node_list)
+        auth, hub = new_auth, new_hub
+        if diff < tol:
+            break
+
+    sorted_auth = sorted(auth.items(), key=lambda x: x[1], reverse=True)
+    sorted_hub = sorted(hub.items(), key=lambda x: x[1], reverse=True)
+    return {
+        'task': 'hits',
+        'authorities': [{ 'node': n, 'score': round(s, 6)} for n, s in sorted_auth],
+        'hubs': [{ 'node': n, 'score': round(s, 6)} for n, s in sorted_hub]
+    }
+
